@@ -38,7 +38,7 @@ from pynvml import (
 from twisted.internet import task, reactor
 import requests
 
-from gpu_sentry import config
+import client_config as config
 
 
 def _convert_kb_to_gb(size):
@@ -64,7 +64,7 @@ def get_statistics():
                 "memory": {
                     "total": _convert_kb_to_gb(int(memory.total)),
                     "used": _convert_kb_to_gb(int(memory.used)),
-                    "utilisation": int(memory.used / memory.total * 100)
+                    "utilization": int(memory.used / memory.total * 100)
                 },
             })
     except NVMLError as error:
@@ -77,10 +77,8 @@ def send_statistics():
     """Send statistics to the server-side API."""
     host = socket.gethostname()
 
-    requests.post(config.SERVER_HOSTNAME,
-                  json={"codename": config.PERMIT_CLIENTS[host]['codename'],
-                        "name": config.PERMIT_CLIENTS[host]['name'],
-                        "hostname": host,
+    requests.post(config.SERVER_URL,
+                  json={"hostname": host,
                         "statistics": get_statistics()})
 
 
@@ -90,3 +88,7 @@ def run_client():
     l.start(config.CLIENT_TIMEOUT)
 
     reactor.run()
+
+
+if __name__=='__main__':
+    run_client()

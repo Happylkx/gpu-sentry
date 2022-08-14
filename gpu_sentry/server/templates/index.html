@@ -30,9 +30,9 @@
                       </div>
                       <ul class="list-group list-group-flush">
                         <li class="list-group-item">
-                          <p>Memory: {{ gpu['memory']['utilisation'] }}% ({{ gpu['memory']['used'] }} GB / {{ gpu['memory']['total'] }} GB)</p>
+                          <p>Memory: {{ gpu['memory']['utilization'] }}% ({{ gpu['memory']['used'] }} GB / {{ gpu['memory']['total'] }} GB)</p>
                           <div class="progress">
-                            <div class="progress-bar" role="progressbar" style="width: {{ gpu['memory']['utilisation'] }}%" aria-valuenow="{{ gpu['memory']['utilisation'] }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar" role="progressbar" style="width: {{ gpu['memory']['utilization'] }}%" aria-valuenow="{{ gpu['memory']['utilization'] }}" aria-valuemin="0" aria-valuemax="100"></div>
                           </div>
                         </li>
                       </ul>

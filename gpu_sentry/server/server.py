@@ -28,11 +28,13 @@ import datetime
 
 from flask import Flask, json, render_template, request
 
-from gpu_sentry import config
+import server_config as config
 
 app = Flask(__name__)
+
+# Cache stats received from clients
 data = {
-    "FULL_HOSTNAME": {},
+    # "FULL_HOSTNAME": {data...},
 }
 
 
@@ -51,8 +53,8 @@ def api():
     hostname = content['hostname']
     if hostname in config.PERMIT_CLIENTS.keys():
         data[hostname] = {
-            "codename": content['codename'],
-            "name": content['name'],
+            "codename": config.PERMIT_CLIENTS[hostname]['codename'],
+            "name": config.PERMIT_CLIENTS[hostname]['name'],
             "statistics": content['statistics'],
             "timestamp": datetime.datetime.now().strftime("%d %B %Y %I:%M%p")
         }
@@ -63,5 +65,10 @@ def api():
 
 def run_server():
     """Run server to render incoming statistics."""
-    app.run(debug=config.SERVER_DEBUG,
-            port=config.SERVER_PORT)
+    app.run(host=config.SERVER_HOSTNAME,
+            port=config.SERVER_PORT,
+            debug=config.SERVER_DEBUG,)
+
+
+if __name__ == '__main__':
+    run_server()
