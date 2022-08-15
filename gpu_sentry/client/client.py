@@ -75,11 +75,16 @@ def get_statistics():
 
 def send_statistics():
     """Send statistics to the server-side API."""
-    host = socket.gethostname()
+    try:
+        host = socket.gethostname()
 
-    requests.post(config.SERVER_URL,
-                  json={"hostname": host,
-                        "statistics": get_statistics()})
+        requests.post(config.SERVER_URL,
+                      json={"hostname": host,
+                            "statistics": get_statistics()})
+    except Exception as err:
+        print("An error occurred while sending statistics: ", err)
+
+    print("Statistics sent.")
 
 
 def run_client():
@@ -90,5 +95,5 @@ def run_client():
     reactor.run()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     run_client()

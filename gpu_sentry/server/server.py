@@ -31,24 +31,27 @@ from flask import Flask, json, render_template, request
 import server_config as config
 
 app = Flask(__name__)
-
-# Cache stats received from clients
 data = {
-    # "FULL_HOSTNAME": {data...},
+
 }
 
+def process_data(data):
+    for host, info in data.items():
+        info['free_gpus']=len(list(filter(lambda gpu: gpu['memory']['used']<1,
+            info['statistics'])))
+        info['gpu_nums'] = len(info['statistics'])
+    return data
 
 @app.route("/", methods=["GET"])
 def index():
     """Render the main page after calling the root path."""
-    return render_template("index.html", data=data)
+    return render_template("index.html", data=process_data(data))
 
 
 @app.route("/api", methods=["POST"])
 def api():
     """Listen for incoming GPU statistics."""
     content = request.json
-
     # Update the statistics if the client is allowed to POST.
     hostname = content['hostname']
     if hostname in config.PERMIT_CLIENTS.keys():
@@ -69,6 +72,5 @@ def run_server():
             port=config.SERVER_PORT,
             debug=config.SERVER_DEBUG,)
 
-
-if __name__ == '__main__':
+if __name__=='__main__':
     run_server()
