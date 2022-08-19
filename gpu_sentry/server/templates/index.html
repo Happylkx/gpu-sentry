@@ -1,3 +1,4 @@
+<!-- Written by Kaixin Li -->
 <!doctype html>
 <html lang="en">
   <head>
@@ -22,80 +23,92 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">GPU Sentry</a>
-
-        <!-- <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Dropdown
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="#">Action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Something else here</a></li>
-              </ul>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled">Disabled</a>
-            </li>
-          </ul>
-
-        </div> -->
       </div>
     </nav>
     <!-- /.navbar-collapse -->
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-8">
-
-
-          {% for host, payload in data.items() %}
-          <div style="margin-top: 20px">
-            <h2>
-              {{ payload['codename'] }} ({{ payload['name'] }})
-              {{ payload['free_gpus'] }} / {{ payload['gpu_nums'] }}
-            </h2>
-            <hr />
-            <table class="table table-striped">
-              <thead>
-                <th>#</th>
-                <th>Name</th>
-                <th>Memory Usage</th>
-                <th>Last Update</th>
-              </thead>
-              <tbody>
-                {% for gpu in payload['statistics'] %}
-                <tr>
-                  <td>{{ gpu['gpu'] }}</td>
-                  <td>{{ gpu['name'] }}</td>
-                  <td>
-                    <span class="{{ 'mem-gpu-free' if gpu['memory']['used']<1.0 else 'mem-gpu-occupied' }}">
-                      {{ gpu['memory']['used'] }} GB
-                    </span>
-                    / {{ gpu['memory']['total'] }} GB
-                  </td>
-                  <td>{{ payload['timestamp'] }}</td>
-                </tr>
-
-                {% endfor %}
-              </tbody>
-
-            </table>
-
-
+          <ul class="nav nav-pills nav-fill" id="viewTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="devices-tab" data-bs-toggle="tab" data-bs-target="#devices-panel" type="button" role="tab" aria-selected="true">Devices</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details-panel" type="button" role="tab" aria-selected="false">Details</button>
+            </li>
+          </ul>
+          <!--Panels-->
+          <div class="tab-content" id="viewTab">
+            <!-- Devices Panel -->
+            <div class="tab-pane fade show active" id="devices-panel" role="tabpanel">
+              {% for device_type in ['free', 'mixed', 'in_use'] %}
+              <div>
+                <h2>{{ device_type }}</h2>
+                <table class="table table-striped">
+                  <thead>
+                    <th>Name</th>
+                    <th>Free GPU Count</th>
+                    <!-- <th>Last Update</th> -->
+                  </thead>
+                  <tbody>
+                    {% for device in data['device_status'][device_type] %}
+                    <tr>
+                      <td>{{ device['name'] }}</td>
+                      <td>{{ device['num_free_gpus'] }} / {{ device['num_gpus'] }}</td>
+                      <td>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              <hr />
+              {% endfor %}
+            </div>
+            <!-- Details Panel -->
+            <div class="tab-pane fade" id="details-panel" role="tabpanel">
+              {% for payload in data['device_details'] %}
+              <div style="margin-top: 20px">
+                <h2>
+                  {{ payload['name'] }}
+                  ({{ payload['num_free_gpus'] }} / {{ payload['num_gpus'] }})
+                </h2>
+                <hr />
+                <h5>Last update: {{ payload['timestamp'] }}</h5>
+                <table class="table table-striped">
+                  <thead>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Memory Usage</th>
+                    <th>Process</th>
+                  </thead>
+                  <tbody>
+                    {% for gpu in payload['statistics'] %}
+                    <tr>
+                      <td>{{ gpu['gpu'] }}</td>
+                      <td>{{ gpu['name'] }}</td>
+                      <td>
+                        <span class="{{ 'mem-gpu-free' if gpu['memory']['used']<1.0 else 'mem-gpu-occupied' }}">
+                          {{ gpu['memory']['used'] }} GB
+                        </span>
+                        / {{ gpu['memory']['total'] }} GB
+                      </td>
+                      <td>
+                        {% for process in gpu['processes'] %}
+                        <p>{{ process }}</p>
+                        {% endfor %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% endfor %}
+            </div>
           </div>
-          {% endfor %}
         </div>
       </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
   </body>
 </html>
