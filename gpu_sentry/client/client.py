@@ -68,6 +68,8 @@ def get_process_info():
     pids = set()  # one process may utilize many gpus
     for line in smi_output[smi_output.rindex('='):].split('\n')[1:-2]:
         tmp = line.split()
+        if len(tmp)==1:
+            continue
         gpu_id, pid = tmp[1], tmp[4]
         pids.add(pid)
         if gpu_id in gpuid_to_pids.keys():
