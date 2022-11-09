@@ -67,6 +67,8 @@ def get_process_info():
     gpuid_to_pids = dict()
     pids = set()  # one process may utilize many gpus
     for line in smi_output[smi_output.rindex('='):].split('\n')[1:-2]:
+        if 'No running processes found' in line:
+            continue
         tmp = line.split()
         if len(tmp)==1:
             continue
@@ -76,7 +78,8 @@ def get_process_info():
             gpuid_to_pids[gpu_id].append(pid)
         else:
             gpuid_to_pids[gpu_id] = [pid]
-
+    if len(pids) == 0:
+        return dict()
     process_output = os.popen(
         f"ps -p {','.join(pids)} -o pid,vsz=MEMORY -o user,group=GROUP -o comm,args=ARGS").read().split('\n')[1:-1]
     """
@@ -130,15 +133,15 @@ def get_statistics():
 
 def send_statistics():
     """Send statistics to the server-side API."""
-    try:
-        host = socket.gethostname()
+    # try:
+    host = socket.gethostname()
 
-        requests.post(config.SERVER_URL,
-                      json={"hostname": host,
-                            "statistics": get_statistics()})
-        print("Statistics sent.")
-    except Exception as err:
-        print("An error occurred while sending statistics: ", err)
+    requests.post(config.SERVER_URL,
+                    json={"hostname": host,
+                        "statistics": get_statistics()})
+    print("Statistics sent.")
+    # except Exception as err:
+    #     print("An error occurred while sending statistics: ", err)
 
 
 def run_client():
